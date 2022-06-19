@@ -7,10 +7,10 @@ This tutorial will follow these steps:
 1. Install R and Rstudio
 2. Download the files from this github repository
 3. Open the SciX.Genies.Rmd file in RStudio
-4. Perfrom the analysis by follow the instructions
+4. Perfrom the analysis by following the instructions
 
 # Overview
-The central dogma of biology states that DNA is transcribed into RNA which is tranlated into protein. RNA sequencing allows scientists to infer the proteins being produced within the tissues of an individual. By comparing the expression levels of RNA between individuals with disease and healthy controls we can identify potential causes of disease or targets for drug therapies. 
+The central dogma of biology states that DNA is transcribed into RNA, which is tranlated into protein. RNA sequencing allows scientists to infer the proteins being produced within the tissues of an individual. By comparing the expression levels of RNA between individuals with disease and healthy controls we can identify potential causes of disease or targets for drug therapies. 
 
 In this study, we have processed raw RNA sequencing data from the brains of people with neurodegenerative disease and healthy controls. These studies include:
 
