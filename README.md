@@ -17,17 +17,17 @@ In this study, we have processed raw RNA sequencing data from the brains of peop
 # Parkinson's disease
 Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106608 \
 Number of patients: 14\
-Number fo controls: 18\
+Number fo controls: 18
 
 # Alzheimer's disease
 Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE159699 \
 Number of patients: 12 \
-Number of controls: Old:10 Young:8 \
+Number of controls: Old:10 Young:8 
 
 # Huntingtons disease
 Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE129473 \
 Number of patients: 8 \
-Number of controls: 5 \
+Number of controls: 5 
 
 # Install R and Rstudio
 We will be using the R programming language and the Rstudio IDE for this analysis.
