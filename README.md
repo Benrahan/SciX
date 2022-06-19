@@ -1,15 +1,13 @@
-# SciX
+# SciX Genies
 
 This is a Github repository for the UNSW SciX program 'Exploring the human genome' for learning Bioinformatics.
 
 This tutorial will follow these steps:
 
 1. Install R and Rstudio
-2. Install R packages
-3. Download Rscript files and RNA sequencing data
-4. Differential expression analysis
-5. Gene Set Enrichment Analysis
-6. Match differentially expressed genes to Genome Wide Association Studies
+2. Download the files from this github repository
+3. Open the SciX.Genies.Rmd file in RStudio
+4. Perfrom the analysis by follow the instructions
 
 # Overview
 The central dogma of biology states that DNA is transcribed into RNA which is tranlated into protein. RNA sequencing allows scientists to infer the proteins being produced within the tissues of an individual. By comparing the expression levels of RNA between individuals with disease and healthy controls we can identify potential causes of disease or targets for drug therapies. 
@@ -17,26 +15,19 @@ The central dogma of biology states that DNA is transcribed into RNA which is tr
 In this study, we have processed raw RNA sequencing data from the brains of people with neurodegenerative disease and healthy controls. These studies include:
 
 # Parkinson's disease
-Link to data:
-Number of patients:
-Number fo controls:
+Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106608
+Number of patients: 14
+Number fo controls: 18
 
 # Alzheimer's disease
-Link to data:
-Number of patients:
-Number of controls:
+Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE159699
+Number of patients: 12
+Number of controls: Old:10 Young:8
 
-# Huntingtons disease.
-Link to data:
-Number of patients:
-Number of controls:
-
-The processing pipeline was as follows:
-1. Files were downloaded from NCBI GEO
-2. Sequencing reads were trimmed with Trimmomatic [REF] to remove adaptors and low quality reads
-3. Reads were mapped to the GRCh38 Human genome with STAR [REF] 
-4. Transcripts counted and annotated with Stringtie [REF]
-
+# Huntingtons disease
+Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE129473
+Number of patients: 8
+Number of controls: 5
 
 # Install R and Rstudio
 We will be using the R programming language and the Rstudio IDE for this analysis.
@@ -47,32 +38,17 @@ https://cran.csiro.au/
 Rstudio can be downloaded and installed at this link:
 https://www.rstudio.com/products/rstudio/download/#download
 
-# Install R packages
-Once both and R and Rstudio have been installed open up Rstudio.
+# Download files from github
+At the top of this page will be a green button *CODE*. Click the button and then select Download ZIP.
+This will download a SciX-main.zip file to your Downloads folder which contains everything you will need for this study. 
+Unzip the file by double clicking and move the directory to your Desktop.
 
-We will now install the packages required for this study. 
-In the window on the left hand side copy and paste these commands.
+# Open the SciX.Genies.Rmd in RStudio 
+Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow the instructions.
+Good luck!
 
-if (!require("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
 
-BiocManager::install("edgeR")
-BiocManager::install("fgsea")
-BiocManager::install("msigdb")
-install.packages('ggplot2')
-install.packages('reshape2')
-
-Then enter the commands with 'shift + enter' or 'run' at the top.
-
-When asked to update all/some/none select all by typing 'a'
-
-To check these packages have been installed correctly enter:
-
-library(ggplot2)
-library(reshape2)
-library(edgeR)
-library(fgsea)
-library(msigdbr)
+Lachlan Gray
 
 
 
