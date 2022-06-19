@@ -24,6 +24,7 @@ The comma seperated file (.csv) we provide is the output from Stringtie which co
 To run the following code, press the green arrow and R will run the code for you. All of the plots and 
 
 ```{r setup, include=FALSE}
+install.packages('knitr', verbose=F)
 knitr::opts_chunk$set(echo = TRUE)
 r <- getOption("repos")
 r["CRAN"] <- "https://cran.csiro.au/"
@@ -37,6 +38,8 @@ install.packages('reshape2')
 install.packages('ggrepel')
 install.packages('ggupset')
 install.packages('BiocManager')
+install.packages('statmod')
+install.packages('pheatmap')
 BiocManager::install("qvalue")
 BiocManager::install("edgeR")
 BiocManager::install("clusterProfiler")
@@ -53,7 +56,8 @@ library(enrichplot, verbose = F)
 library(edgeR, verbose = F)
 library(DOSE, verbose = F)
 library(clusterProfiler, verbose = F)
-library(org.Hs.eg.db, verbose = F)
+library(statmod, verbose=F)
+library(pheatmap, verbose=F)
 ```
 
 ## Set working directory
@@ -211,7 +215,7 @@ dev.off()
 # Over Representation Analysis (ORA)
 
 ```{r echo=FALSE}
-gene.set <- read.gmt('SciX-main/reactome.gmt')
+gene.set <- read.gmt('reactome.gmt')
 sigOE <- subset(lrt, abs(logFC) > 0.5 & FDR < 0.05)
 
 ego <- enricher(gene = sigOE$gene, 
@@ -233,7 +237,7 @@ dev.off()
 
 ### Match genes to DisGeneNet and perform chi-squared test
 ```{r echo=FALSE}
-disgene <- read.delim('disgenenet.HD.disease.tsv', header=T, sep="\t")
+disgene <- read.delim('disgenenet.HD.tsv', header=T, sep="\t")
 disgene <- unique(disgene$Gene)
 
 deg <- subset(lrt, abs(logFC) > 0.5 & FDR < 0.05)
@@ -268,7 +272,7 @@ dotplot(ego, orderBy="GeneRatio", font.size=12, label_format=20)
 dev.off()
 ```
 
-### Extract genes from interesting pathway
+### Extract genes from interesting pathway. Select pathway with **pathway** variable
 ```{r echo=FALSE}
 pathway <- 1
 plot.genes <- unlist(strsplit(data.frame(ego)[pathway,8], '/'))
@@ -276,7 +280,7 @@ gene.name <-
 rownames(tmm) <- gsub('ENSG[0-9]+.[0-9]+\\|', '', rownames(tmm))
 colnames(tmm) <- gsub('[0-9]+', '', colnames(tmm))
 plot.data <- subset(tmm, rownames(tmm) %in% plot.genes)
-plot.data <- plot.data[order(rowSums(plot.data), decreasing = T),][1:10,]
+plot.data <- plot.data[order(rowSums(plot.data), decreasing = T),]
 plot.data <- melt(plot.data)
 colnames(plot.data) <- c('gene', 'condition', 'cpm')
 ggplot(plot.data, aes(x=gene, y=cpm, fill=condition)) + 
