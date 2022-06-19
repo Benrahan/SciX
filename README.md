@@ -16,8 +16,8 @@ In this study, we have processed raw RNA sequencing data from the brains of peop
 
 # Parkinson's disease
 Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106608 \
-Number of patients: 14\
-Number fo controls: 18
+Number of patients: 14 \
+Number of controls: 18
 
 # Alzheimer's disease
 Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE159699 \
@@ -39,17 +39,17 @@ Rstudio can be downloaded and installed at this link:
 https://www.rstudio.com/products/rstudio/download/#download
 
 # Download files from github
-At the top of this page will be a green button **CODE**. Click the button and then select Download ZIP.
-This will download a SciX-main.zip file to your Downloads folder which contains everything you will need for this study. 
-Unzip the file by double clicking and move the directory to your Desktop.
+At the top of this page is be a green button **CODE**. Click the button and then select **Download ZIP**.
+This will download a SciX-main.zip file to your Downloads folder on your computer. This file contains everything you will need to perform this study. 
+Unzip the file by double clicking and move the unzipped directory to your Desktop.
 
 # Open the SciX.Genies.Rmd in RStudio 
-Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow the instructions.
-Good luck!
+Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow the instructions and Good luck.
 
 
 - Lachlan Gray
-twitter: @LGGray95
+twitter: \
+@LGGray95
 
 
 
