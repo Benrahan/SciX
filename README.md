@@ -15,19 +15,19 @@ The central dogma of biology states that DNA is transcribed into RNA, which is t
 In this study, we have processed raw RNA sequencing data from the brains of people with neurodegenerative disease and healthy controls. These studies include:
 
 # Parkinson's disease
-Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106608
-Number of patients: 14
-Number fo controls: 18
+Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106608. 
+Number of patients: 14. 
+Number fo controls: 18. 
 
 # Alzheimer's disease
-Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE159699
-Number of patients: 12
-Number of controls: Old:10 Young:8
+Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE159699. 
+Number of patients: 12. 
+Number of controls: Old:10 Young:8. 
 
 # Huntingtons disease
-Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE129473
-Number of patients: 8
-Number of controls: 5
+Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE129473. 
+Number of patients: 8. 
+Number of controls: 5. 
 
 # Install R and Rstudio
 We will be using the R programming language and the Rstudio IDE for this analysis.
@@ -39,7 +39,7 @@ Rstudio can be downloaded and installed at this link:
 https://www.rstudio.com/products/rstudio/download/#download
 
 # Download files from github
-At the top of this page will be a green button *CODE*. Click the button and then select Download ZIP.
+At the top of this page will be a green button **CODE**. Click the button and then select Download ZIP.
 This will download a SciX-main.zip file to your Downloads folder which contains everything you will need for this study. 
 Unzip the file by double clicking and move the directory to your Desktop.
 
@@ -48,7 +48,8 @@ Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow th
 Good luck!
 
 
-Lachlan Gray
+- Lachlan Gray
+twitter: @LGGray95
 
 
 
