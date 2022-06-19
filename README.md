@@ -47,7 +47,9 @@ Unzip the file by double clicking and move the unzipped directory to your Deskto
 Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow the instructions and Good luck.
 
 
-- Lachlan Gray
+Lachlan Gray \
+email: \
+l.gray@garvan.org.au \
 twitter: \
 @LGGray95
 
