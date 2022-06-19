@@ -6,7 +6,7 @@ output: html_document
 runtime: shiny
 ---
 # Introduction
-The central dogma of biology states that DNA is transcribed into RNA which is tranlated into protein. RNA sequencing allows scientists to infer the proteins being produced within the tissues of an individual. By comparing the expression levels of RNA between individuals with disease and healthy controls we can identify potential causes of disease or therapeutic drug targets.
+The central dogma of biology states that DNA is transcribed into RNA which is then tranlated into protein. RNA sequencing allows scientists to infer the proteins being produced within the tissues of an individual. By comparing the expression levels of RNA between individuals with disease and healthy controls we can identify potential causes of disease or therapeutic drug targets.
 
 In this study, we have processed raw RNA sequencing data from the brains of people with neurodegenerative disease and healthy controls. These studies include:
 * Parkinson's disease
@@ -17,11 +17,11 @@ To process the raw RNA sequencing reads we have done the following:
 1. Files were downloaded from NCBI GEO
 2. Sequencing reads were trimmed with Trimmomatic to remove adaptors and low quality reads
 3. Reads were mapped to the GRCh38 Human genome with STAR
-4. Transcripts counted and annotated with Stringtie
+4. Transcripts were counted and annotated with Stringtie
 
-The comma seperated file (.csv) we provide is the output from Stringtie which contains the raw counts of each RNA transcript sequenced in each sample. 
+The comma seperated file (.csv) we provide is the output from Stringtie. This contains the raw counts of each RNA transcript sequenced within each sample. 
 
-To run the following code, press the green arrow and R will run the code for you. All of the plots and 
+To run the following code, press the green arrow/play button and R will run the code for you. All of the plots and files will be automatically saved to the SciX-main directory.
 
 ```{r setup, include=FALSE}
 install.packages('knitr', verbose=F)
@@ -31,15 +31,16 @@ r["CRAN"] <- "https://cran.csiro.au/"
 options(repos = r)
 ```
 
-### Install packages
+### Install packages 
+If asked to update all/some/none just enter 'a' in the console below.
 ```{r, echo=FALSE}
-install.packages('ggplot2')
-install.packages('reshape2')
-install.packages('ggrepel')
-install.packages('ggupset')
-install.packages('BiocManager')
-install.packages('statmod')
-install.packages('pheatmap')
+install.packages('ggplot2', verbose = F)
+install.packages('reshape2', verbose = F)
+install.packages('ggrepel', verbose = F)
+install.packages('ggupset', verbose = F)
+install.packages('BiocManager', verbose = F)
+install.packages('statmod', verbose = F)
+install.packages('pheatmap', verbose = F)
 BiocManager::install("qvalue")
 BiocManager::install("edgeR")
 BiocManager::install("clusterProfiler")
