@@ -44,7 +44,8 @@ This will download a SciX-main.zip file to your Downloads folder on your compute
 Unzip the file by double clicking and move the unzipped directory to your Desktop.
 
 # Open the SciX.Genies.Rmd in RStudio 
-Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow the instructions and Good luck.
+Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow the instructions.\
+Enjoy and good luck!
 
 
 Lachlan Gray \
