@@ -68,12 +68,12 @@ As naming paths are different in Mac and PC please make sure you run the appropr
 
 ### For Mac
 ```{r echo=FALSE}
-setwd('~/Desktop/SciX-main/')
+setwd('~/Desktop/SciX/')
 ```
 
 ### For PC
 ```{r echo=FALSE}
-setwd(paste0(file.path(Sys.getenv("USERPROFILE"),"Desktop"), 'SciX-main'))
+setwd(paste0(file.path(Sys.getenv("USERPROFILE"),"Desktop"), 'SciX'))
 ```
 
 ### Read in RNA sequencing count matrix
@@ -254,12 +254,17 @@ d <- lrt[lrt$FDR > 0.05 & !(lrt$gene %in% disgene),]$gene
 ctable <- matrix(c(length(a),length(b),length(c),length(d)),nrow=2, ncol=2)
 chisq <- chisq.test(ctable)
 
-# Expected values
+print('Expected values')
 chisq$expected
-# Observed values
+
+print('Observed values')
 chisq$observed
-# Pearson residuals. Positive values indicate a positive association
+
+print('Pearson residuals') #Positive values indicate a positive association
 chisq$residuals
+
+print('chi.squared p.value')
+chisq$p.value
 
 # ORA of significant genes known to cause disease
 ego <- enricher(gene = a, 
