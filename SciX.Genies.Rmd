@@ -186,7 +186,7 @@ ggplot(lrt) +
         axis.title = element_text(size = rel(1.25))) +
   scale_color_discrete(name = "DEG")
 
-pdf('Volcano.Plot.pdf')
+pdf(paste0('Volcano.Plot.top', n.genes, '.pdf'))
 ggplot(lrt) +
   geom_point(aes(x=logFC, y=-log10(FDR), colour=threshold)) +
   geom_text_repel(data=head(ordered, n.genes), aes(x=logFC, y=-log10(FDR), label=gene)) +
@@ -208,7 +208,7 @@ mat <- tmm[head(order(lrt$FDR), n.genes),]
 rownames(mat) <- gsub('ENSG[0-9]+.[0-9]+\\|', '', rownames(mat))
 pheatmap::pheatmap(mat)
 
-pdf('heatmap.pdf')
+pdf(paste0('Heatmap.top', n.genes, '.pdf'))
 pheatmap::pheatmap(mat)
 dev.off()
 ```
