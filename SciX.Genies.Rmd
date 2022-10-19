@@ -68,12 +68,12 @@ As naming paths are different in Mac and PC please make sure you run the appropr
 
 ### For Mac
 ```{r echo=FALSE}
-setwd('~/Desktop/SciX/')
+setwd('~/Desktop/SciX-main/')
 ```
 
 ### For PC
 ```{r echo=FALSE}
-setwd(paste0(file.path(Sys.getenv("USERPROFILE"),"Desktop"), 'SciX'))
+setwd(paste0(file.path(Sys.getenv("USERPROFILE"),"Desktop"), 'SciX-main'))
 ```
 
 ### Read in RNA sequencing count matrix
