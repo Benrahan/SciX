@@ -47,7 +47,7 @@ This will download a SciX-main.zip file to your Downloads folder on your compute
 Unzip the file by double clicking and move the unzipped directory to your Desktop.
 
 # Open the .Rmd in RStudio
-Choose a disease and open the respective folder e.g AD, PD, HD
+Choose a disease and open the respective folder e.g AD, PD, HD \
 Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow the instructions.\
 Enjoy and good luck!
 
