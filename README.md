@@ -38,7 +38,7 @@ Number of controls: 5
 # Preprocessing method
 Trimmomatic v.0.39: Remove sequencing adapters and low quality reads \
 STAR v.2.7.9a: Align sequencing reads to the GRch38 Homo sapiens reference genome \
-Stringtie v.2.1.7: Annotate genes against GENCODE v.29 and quantify read counts \
+Stringtie v.2.1.7: Annotate genes against GENCODE v.29 and quantify read counts 
 
 # Install R and Rstudio
 We will be using the R programming language and the Rstudio IDE for this analysis.
