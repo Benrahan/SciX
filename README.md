@@ -6,17 +6,20 @@ This tutorial will follow these steps:
 
 1. Install R and Rstudio
 2. Download the files from this github repository
-3. Move the SciX-main.zip to Desktop and unzip
+3. Move the SciX-main.zip to Desktop and unzip the file
 3. Open the .Rmd file in RStudio
-4. Perform the analysis by following the instructions
+4. Perform  analysis by following  instructions in the Rmarkdown file
 
 # Overview
-The central dogma of biology states that DNA is transcribed into RNA, which is tranlated into protein. RNA sequencing allows scientists to infer the proteins being produced within the tissues of an individual. By comparing the expression levels of RNA between individuals with disease and healthy controls we can identify genes which contribute to disease or possible targets for drug therapies. 
+Transcriptomics is a field of biology interested in the structure and function of Ribonucleic acid (RNA). RNA is genetic information used by our cells to instruct and regulate protein production. Proteins catalyze chemical reactions as enzymes, function as signalling molecules like neurotransmitters or cytokines, and provide structure to make up cells, tissues and organs. 
 
-In this study, we have processed raw RNA sequencing data from the brains of people with neurodegenerative disease and healthy controls. These studies include:
+By sequencing and measuring the abundance of RNA, scientists are able to infer cellular activity and the proteins being produced within tissues and organs. By comparing RNA expression levels between individuals with disease and healthy controls we can then identify the genes contributing to a disease and provide evidence for diagnostic biomarkers and drug targets. 
+
+In this study, RNA sequencing data from the brains of individuals with neurodegenerative disease and healthy controls was checked for quality and pre-processed using peer reviewed and commonly used bioinformatics tools (see below). The data analysed in this study include:
 
 # Parkinson's disease (PD)
 Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE106608 \
+Link to paper: NA \
 Number of patients: 14 \
 Number of controls: 18
 
@@ -30,7 +33,12 @@ Number of controls: Old:10 Young:8
 Link to data: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE129473 \
 Link to original paper: https://bmcmedgenomics.biomedcentral.com/articles/10.1186/s12920-019-0581-9 \
 Number of patients: 8 \
-Number of controls: 5 
+Number of controls: 5
+
+# Preprocessing method
+Trimmomatic v.0.39: Remove sequencing adapters and low quality reads
+STAR v.2.7.9a: Align sequencing reads to the GRch38 Homo sapiens reference genome
+Stringtie v.2.1.7: Annotate genes against GENCODE v.29 and quantify read counts
 
 # Install R and Rstudio
 We will be using the R programming language and the Rstudio IDE for this analysis.
@@ -39,7 +47,7 @@ To install R please follow this link to download and install the correct version
 https://cran.csiro.au/
 
 Rstudio can be downloaded and installed at this link:
-https://www.rstudio.com/products/rstudio/download/#download
+https://posit.co/download/rstudio-desktop/
 
 # Download files from github
 At the top of this page is be a green button **CODE**. Click the button and then select **Download ZIP**.
@@ -49,7 +57,7 @@ Unzip the file by double clicking and move the unzipped directory to your Deskto
 # Open the .Rmd in RStudio
 Choose a disease and open the respective folder e.g AD, PD, HD \
 Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow the instructions.\
-Enjoy and good luck!
+Enjoy!
 
 
 Lachlan Gray \
