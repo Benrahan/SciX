@@ -11,7 +11,7 @@ This tutorial will follow these steps:
 4. Perform  analysis by following  instructions in the Rmarkdown file
 
 # Overview
-Transcriptomics is a field of biology interested in the structure and function of Ribonucleic acid (RNA). RNA is genetic information used by our cells to instruct and regulate protein production. Proteins catalyze chemical reactions as enzymes, function as signalling molecules like neurotransmitters or cytokines, and provide structure to make up cells, tissues and organs. 
+Transcriptomics is a field of biology interested in the structure and function of Ribonucleic acid (RNA). RNA is genetic information used by our cells to instruct and regulate protein production. Proteins catalyze chemical reactions as enzymes, function as signalling molecules like neurotransmitters or cytokines, and provide the structures which make up cells, tissues and organs. 
 
 By sequencing and measuring the abundance of RNA, scientists are able to infer cellular activity and the proteins being produced within tissues and organs. By comparing RNA expression levels between individuals with disease and healthy controls we can then identify the genes contributing to a disease and provide evidence for diagnostic biomarkers and drug targets. 
 
