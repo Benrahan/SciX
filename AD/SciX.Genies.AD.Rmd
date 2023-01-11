@@ -1,0 +1,306 @@
+---
+title: 'SciX: Genies'
+author: "Lachlan Gray"
+date: "19/06/2022"
+output: html_document
+runtime: shiny
+---
+### Introduction
+
+This file is an Rmarkdown file. Upon successfully installed R and RStudio you should be able to follow the instructions below. If you run into errors please flag on the GitHub page or search the error in Google.
+
+To run each chunk of code press the green arrow next to the command or select the code and run with 'command + enter'.
+
+Opening this Rmarkdown file will place us into the required working directory. A directory is another name for folders on the computer. All of the plots and files we generate will be saved to the working directory.
+We can find which directory we are in with the getwd() command:
+
+```{r echo=FALSE}
+getwd()
+```
+
+For MacOS and Linux getwd() should return the following path:
+"/Users/USER/Desktop/SciX-main/HD"
+
+We can then see which files are available in this directory with the dir() command:
+```{r setup, include=FALSE}
+dir()
+```
+
+
+### Setting up R
+```{r setup, include=FALSE}
+install.packages('knitr', verbose=F)
+knitr::opts_chunk$set(echo = TRUE)
+r <- getOption("repos")
+r["CRAN"] <- "https://cran.csiro.au/"
+options(repos = r)
+```
+
+### Install packages 
+If asked to update all/some/none just enter 'a' in the console below.
+```{r, echo=FALSE}
+install.packages('ggplot2', verbose = F)
+install.packages('reshape2', verbose = F)
+install.packages('ggrepel', verbose = F)
+install.packages('ggupset', verbose = F)
+install.packages('BiocManager', verbose = F)
+install.packages('statmod', verbose = F)
+install.packages('pheatmap', verbose = F)
+BiocManager::install("qvalue")
+BiocManager::install("edgeR")
+BiocManager::install("clusterProfiler")
+```
+
+### Load the packages
+```{r echo=FALSE}
+library(ggplot2, verbose = F)
+library(qvalue, verbose = F)
+library(reshape2, verbose = F)
+library(ggrepel, verbose = F)
+library(ggupset, verbose = F)
+library(enrichplot, verbose = F)
+library(edgeR, verbose = F)
+library(DOSE, verbose = F)
+library(clusterProfiler, verbose = F)
+library(statmod, verbose=F)
+library(pheatmap, verbose=F)
+```
+
+### Read in RNA sequencing count matrix. This is the data that we will be using for this experiment
+The read.csv command allows us to load a comma separated file into R. This file contains data in the form of a matrix (a grid of numbers). The "header" option is set to "T" which means that the first row of the file contains the names of the columns. The "row.names" option is set to "1" which means that the first column of the file containing the gene names is used to name each row.
+We then print the first five rows of the matrix (which includes all of the columns) to the screen. It also prints the dimensions of the matrix, which tells us the number of rows (genes) and columns (individuals) in the matrix.
+```{r echo=FALSE}
+# Read in comma separated count matrix
+count.matrix <- read.csv('AD.data.csv', 
+                         header=T, row.names = 1)
+# print the first five rows and all of the columns
+count.matrix[1:5,]
+# Print the dimensions of this matrix. This tells us we have 58,721 genes and 13 individuals
+dim(count.matrix)
+```
+
+### Read in sample metadata
+```{r echo=FALSE}
+metadata <- read.delim('AD.metadata.txt')
+metadata <- metadata[order(metadata$condition),]
+table(metadata$condition)
+```
+
+### To make the column names more informative we replace with metadata$condition column
+```{r echo=FALSE}
+count.matrix <- count.matrix[,metadata$run]
+colnames(count.matrix) <- c(paste(metadata$condition[1:12], 1:12, sep='_'),
+                            paste(metadata$condition[13:22], 1:10, sep='_'),
+                            paste(metadata$condition[23:30], 1:8, sep='_'))
+```
+
+### Adding biological sex to the metadata file
+You may have noticed that information about the individuals age and sex is missing from the metadata. By looking at expression of genes on the X and Y chromosomes we can determine the biological sex of these samples. The method to infer sex from gene expression is a little complicated but we can return to this later if you'd like.
+```{r echo=FALSE}
+# Load in chrY data from the directory behind the working directory
+load('../chrY.Rdata')
+
+# First we infer sex based on expression of female specific XIST gene
+XIST.expression <- unlist(count.matrix[grep('XIST', rownames(count.matrix)),])
+
+# Filter matrix for XIST and Y chromosome genes then filter and transpose data to have genes on columns and samples on rows
+count.matrix.Y <- count.matrix %>%
+  mutate(gene = gsub('.+\\|', '', rownames(count.matrix))) %>%
+  filter(gene %in% c('XIST', rownames(chrY))) %>% 
+  select(-gene) %>%
+  filter(rowSums(.) > nrow(.)) %>% 
+  t() %>%
+  data.frame()
+
+# Perform hierarchical clustering to identify groups
+dissimilarity <- dist(count.matrix.Y[,-1], method='euclidean')
+cluster <- hclust(dissimilarity, method = 'centroid')
+plot(cluster)
+cluster.result <- cutree(cluster, k=2)
+
+# Assign sex based on dendrogram
+metadata$sex <- ifelse(cluster.result == 2, 'F', 'M')
+# sanity check of XIST expression
+XIST.expression
+
+```
+
+# Differential expression analysis with edgeR likelihood ratio test
+We will perform a statistical test to determine which genes are different between our conditions. For this, we will use the likelihood ratio test which takes models from each condition and compares them.
+We then make our disease samples the reference group. This tells us the difference in gene expression in relation to our disease group. For example, a gene with a positive (+) logFC is upregulated in disease and a negative (-) logFC is downregulated in disease.
+We then filter out lowly expressed genes, normalise the expression values and perform the test.
+To visualise our results, we create plots to show differentially expressed genes.
+
+
+```{r echo=FALSE}
+# Create a dataframe containing all of the required information
+targets = data.frame(group = metadata$condition,
+                    sex = metadata$sex)
+# Create the model which considers the sex and condition in the analysis
+design <- model.matrix(~0+sex+group, data=targets)
+y = DGEList(counts = count.matrix, group = targets$group)
+# Change the reference group to the disease group
+y$samples$group <- factor(y$samples$group, levels=c('disease', 'old', 'young'))
+# Filter lowly expressed genes
+keep <- filterByExpr(y)
+y <- y[keep, ,keep.lib.sizes=FALSE]
+# Normalise the data to remove between sample differences
+y <- calcNormFactors(y, method = "TMM")
+# Transform data into a counts per million value
+tmm <- cpm(y)
+# Estimate the dispersion in the data
+y <- estimateDisp(y, design, robust=TRUE)
+# Fit data to a model and include disease vs old and disease vs young
+fit <- glmQLFit(y, design, coef=3:4)
+# Likelihood ratio test to compare models
+lrt <- glmLRT(fit)
+tt <- topTags(lrt, n=nrow(y), p.value=0.05)
+# Smearplot
+plotSmear(lrt, de.tags=rownames(tt$table))
+pdf('smearplot.pdf')
+plotSmear(lrt, de.tags=rownames(tt$table))
+dev.off()
+print(summary(decideTests(lrt)))
+lrt <- as.data.frame(lrt)
+lrt$FDR <- qvalue(lrt$PValue)$qvalues
+gene <- gsub('ENSG[0-9]+.[0-9]+\\|', '', rownames(lrt))
+lrt <- cbind(gene,lrt)
+# Top 10 differentially expressed genes
+lrt[order(lrt$FDR),][1:10,]
+
+# MDS plot
+mds <- plotMDS(y, top=1000, plot=F)
+toplot <- data.frame(Dim1 = mds$x, Dim2=mds$y, group=factor(y$samples$group), sex=factor(metadata$sex))
+mds.plot <- ggplot(toplot, aes(Dim1, Dim2, colour=group)) + 
+  geom_point(aes(shape=sex), size=5) +
+  scale_shape_manual(values=c(17, 15)) +
+  geom_text_repel(data=toplot, label=rownames(toplot)) +
+  ggtitle('Multidimensional scaling (MDS) plot')
+
+pdf('MDS.plot.pdf')
+mds.plot
+dev.off()
+```
+
+### Save result file to working directory
+```{r echo=TRUE}
+write.table(lrt, row.names = F, sep = "\t", 'edgeR-LRT.AD.txt')
+```
+
+## Displaying results in volcano plot
+This plot displays the log fold-change and false discovery rate for each gene. You can select the number of genes to label with the **n.genes** variable below.
+```{r echo=FALSE}
+n.genes = 20
+
+threshold <- lrt$FDR < 0.05 & abs(lrt$logFC) > 0.5
+lrt$threshold <- threshold
+
+# Order on FDR
+ordered <- lrt[order(lrt$FDR),]
+volcano.plot <- ggplot(lrt) +
+  geom_point(aes(x=logFC, y=-log10(FDR), colour=threshold)) +
+  geom_text_repel(data=head(ordered, n.genes), aes(x=logFC, y=-log10(FDR), label=gene)) +
+  ggtitle("Volcano Plot: Alzheimer's Disease") +
+  xlab("log2 fold change") +
+  ylab("-log10 FDR") +
+  theme(plot.title = element_text(size = rel(1.5), hjust = 0.5),
+        axis.title = element_text(size = rel(1.25))) +
+  scale_color_discrete(name = "DEG")
+volcano.plot
+
+pdf(paste0('Volcano.Plot.top', n.genes, '.pdf'))
+volcano.plot
+dev.off()
+```
+
+# Over Representation Analysis (ORA)
+```{r echo=FALSE}
+gene.set <- read.gmt('../reactome.gmt')
+sigOE <- subset(lrt, abs(logFC) > 0.5 & FDR < 0.05)
+
+ego <- enricher(gene = sigOE$gene, 
+         universe = lrt$gene,
+         pAdjustMethod = "fdr", 
+         qvalueCutoff = 0.01,
+         TERM2GENE = gene.set)
+
+dotplot(ego, showCategory=20, orderBy="GeneRatio")
+pdf('reactome.ORA.pdf', width = 14)
+dotplot(ego, showCategory=20, orderBy="GeneRatio")
+dev.off()
+
+upsetplot(ego)
+pdf('reactome.upsetplot.pdf')
+upsetplot(ego)
+dev.off()
+```
+
+### Match genes to DisGeneNet and perform chi-squared test
+```{r echo=FALSE}
+disgene <- read.delim('disgenenet.AD.tsv', header=T, sep="\t")
+disgene <- unique(disgene$Gene)
+
+deg <- subset(lrt, abs(logFC) > 0.5 & FDR < 0.05)
+not.deg <- subset(lrt, FDR > 0.05)
+up <- subset(lrt, logFC > 0.5 & FDR < 0.05)
+down <- subset(lrt, logFC < -0.5 & FDR < 0.05)
+
+# calculate numbers for different conditions
+a <- lrt[lrt$FDR < 0.05 & abs(lrt$logFC) > 0.5 & lrt$gene %in% disgene,]$gene
+b <- lrt[lrt$FDR < 0.05 & abs(lrt$logFC) > 0.5 & !(lrt$gene %in% disgene),]$gene
+c <- lrt[lrt$FDR > 0.05 & lrt$gene %in% disgene,]$gene
+d <- lrt[lrt$FDR > 0.05 & !(lrt$gene %in% disgene),]$gene
+ctable <- matrix(c(length(a),length(b),length(c),length(d)),nrow=2, ncol=2)
+chisq <- chisq.test(ctable)
+
+print('Expected values')
+chisq$expected
+
+print('Observed values')
+chisq$observed
+
+print('Pearson residuals') #Positive values indicate a positive association
+chisq$residuals
+
+print('chi.squared p.value')
+chisq$p.value
+
+# ORA of significant genes known to cause disease
+ego <- enricher(gene = a, 
+                universe = lrt$gene,
+                pAdjustMethod = "fdr", 
+                qvalueCutoff = 0.01,
+                TERM2GENE = gene.set)
+dotplot(ego, orderBy="GeneRatio", font.size=10, label_format=20)
+pdf('disgenenet.ORA.pdf', width=14)
+dotplot(ego, orderBy="GeneRatio", font.size=12, label_format=20)
+dev.off()
+```
+
+### Extract genes from interesting pathway. Select pathway with **pathway** variable
+```{r echo=FALSE}
+pathway <- 1
+plot.genes <- unlist(strsplit(data.frame(ego)[pathway,8], '/'))
+gene.name <- 
+rownames(tmm) <- gsub('ENSG[0-9]+.[0-9]+\\|', '', rownames(tmm))
+colnames(tmm) <- gsub('[0-9]+', '', colnames(tmm))
+plot.data <- subset(tmm, rownames(tmm) %in% plot.genes)
+plot.data <- plot.data[order(rowSums(plot.data), decreasing = T),]
+plot.data <- melt(plot.data)
+colnames(plot.data) <- c('gene', 'condition', 'cpm')
+boxplot.plot <- ggplot(plot.data, aes(x=gene, y=cpm, fill=condition)) + 
+  geom_boxplot() +
+  theme(axis.text.x = element_text(angle=45, hjust=1)) +
+  ggtitle(paste('', ego[pathway,1])) +
+  ggtitle(paste('Expression of', ego[pathway,1], 'genes'))
+
+boxplot.plot
+
+pdf('boxplot.pdf', width=14)
+boxplot.plot
+dev.off()
+
+# Show logFC of genes in pathway
+subset(lrt, gene %in% plot.data$gene)
+```
+
