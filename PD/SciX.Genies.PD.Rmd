@@ -5,24 +5,29 @@ date: "19/06/2022"
 output: html_document
 runtime: shiny
 ---
-# Introduction
-The central dogma of biology states that DNA is transcribed into RNA which is then tranlated into protein. RNA sequencing allows scientists to infer the proteins being produced within the tissues of an individual. By comparing the expression levels of RNA between individuals with disease and healthy controls we can identify potential causes of disease or therapeutic drug targets.
+### Introduction
 
-In this study, we have processed raw RNA sequencing data from the brains of people with neurodegenerative disease and healthy controls. These studies include:
-* Parkinson's disease
-* Alzheimer's disease
-* Hungtington's disease
+This file is an Rmarkdown file. Upon successfully installed R and RStudio you should be able to follow the instructions below. If you run into errors please flag on the GitHub page or search the error in Google.
 
-To process the raw RNA sequencing reads we have done the following:
-1. Files were downloaded from NCBI GEO
-2. Sequencing reads were trimmed with Trimmomatic to remove adaptors and low quality reads
-3. Reads were mapped to the GRCh38 Human genome with STAR
-4. Transcripts were counted and annotated with Stringtie
+To run each chunk of code press the green arrow next to the command or select the code and run with 'command + enter'.
 
-The comma seperated file (.csv) we provide is the output from Stringtie. This contains the raw counts of each RNA transcript sequenced within each sample. 
+Opening this Rmarkdown file will place us into the required working directory. A directory is another name for folders on the computer. All of the plots and files we generate will be saved to the working directory.
+We can find which directory we are in with the getwd() command:
 
-To run the following code, press the green arrow/play button and R will run the code for you. All of the plots and files will be automatically saved to the SciX-main directory.
+```{r echo=FALSE}
+getwd()
+```
 
+For MacOS and Linux getwd() should return the following path:
+"/Users/USER/Desktop/SciX-main/HD"
+
+We can then see which files are available in this directory with the dir() command:
+```{r setup, include=FALSE}
+dir()
+```
+
+
+### Setting up R
 ```{r setup, include=FALSE}
 install.packages('knitr', verbose=F)
 knitr::opts_chunk$set(echo = TRUE)
@@ -66,31 +71,23 @@ We need to tell R which folder (known as directory) our data is located and wher
 This directory will be the unzipped SciX-main directory we just downloaded.  
 As naming paths are different in Mac and PC please make sure you run the appropriate line of code.
 
-### For Mac
+### Read in RNA sequencing count matrix. This is the data that we will be using for this experiment
+The read.csv command allows us to load a comma separated file into R. This file contains data in the form of a matrix (a grid of numbers). The "header" option is set to "T" which means that the first row of the file contains the names of the columns. The "row.names" option is set to "1" which means that the first column of the file containing the gene names is used to name each row.
+We then print the first five rows of the matrix (which includes all of the columns) to the screen. It also prints the dimensions of the matrix, which tells us the number of rows (genes) and columns (individuals) in the matrix.
 ```{r echo=FALSE}
-setwd('~/Dropbox (Garvan)/LGray PhD/SciX 2022 files/PD')
-```
-
-### For PC
-```{r echo=FALSE}
-setwd(paste0(file.path(Sys.getenv("USERPROFILE"),"Desktop"), 'SciX-main'))
-```
-
-### Read in RNA sequencing count matrix
-```{r echo=FALSE}
+# Read in comma separated count matrix
 count.matrix <- read.csv('PD.data.csv', 
                          header=T, row.names = 1)
+# print the first five rows and all of the columns
+count.matrix[1:5,]
+# Print the dimensions of this matrix. This tells us we have 58,721 genes and 13 individuals
+dim(count.matrix)
 ```
 
 ### Read in sample metadata
 ```{r echo=FALSE}
 metadata <- unique(read.delim('PD.metadata.txt')[,-1])
 print(metadata)
-```
-
-### The count matrix has  gene names as rownames and  sample names as column names
-```{r echo=FALSE}
-count.matrix[1:5,]
 ```
 
 ### To make the column names more informative we replace with metadata$condition column
@@ -103,27 +100,35 @@ count.matrix[1:5,]
 ```
 
 # Differential expression analysis with edgeR likelihood ratio test
-We will perform a statistical test to determine which genes are different between our conditions. For this, we will use the likelihood ratio test which ...
-Before we start we have to tell R the condition and sex of each sample.
-We then make our disease samples the reference group. This tells us the difference in gene expression in relation to our disease group. For example, a gene with a poitive logFC is upregulated in disease and a negative logFC is downregulated in disease.
+We will perform a statistical test to determine which genes are different between our conditions. For this, we will use the likelihood ratio test which takes models from each condition and compares them.
+We then make our disease samples the reference group. This tells us the difference in gene expression in relation to our disease group. For example, a gene with a positive (+) logFC is upregulated in disease and a negative (-) logFC is downregulated in disease.
 We then filter out lowly expressed genes, normalise the expression values and perform the test.
 To visualise our results, we create plots to show differentially expressed genes.
 
 ```{r echo=FALSE}
+# Create a dataframe containing all of the required information
 targets = data.frame(group = gsub('_[0-9]+', '', 
                     metadata$condition),
                     sex = metadata$sex,
                     age = metadata$age)
+# Create the model which considers the sex, age and condition in the analysis
 design <- model.matrix(~0+sex+age+group, data=targets)
 y = DGEList(counts = count.matrix, group = targets$group)
+# Change the reference group to the disease group
 y$samples$group <- factor(y$samples$group, levels=c('disease', 'control'))
+# Filter lowly expressed genes
 keep <- filterByExpr(y)
 y <- y[keep, ,keep.lib.sizes=FALSE]
+# Normalise the data to remove between sample differences
 y <- calcNormFactors(y, method = "TMM")
+# Transform data into a counts per million value
 tmm <- cpm(y)
+# Estimate the dispersion in the data
 y <- estimateDisp(y, design, robust=TRUE)
+# Fit data to a model
 fit <- glmQLFit(y, design)
-lrt <- glmLRT(fit, coef=ncol(fit$design))
+# Likelihood ratio test to compare models
+lrt <- glmLRT(fit)
 tt <- topTags(lrt, n=nrow(y), p.value=0.05)
 # Smearplot
 plotSmear(lrt, de.tags=rownames(tt$table))
@@ -141,18 +146,14 @@ lrt[order(lrt$FDR),][1:10,]
 # MDS plot
 mds <- plotMDS(y, top=1000, plot=F)
 toplot <- data.frame(Dim1 = mds$x, Dim2=mds$y, group=factor(y$samples$group), sex=factor(metadata$sex))
-ggplot(toplot, aes(Dim1, Dim2, colour=group)) + 
+mds.plot <- ggplot(toplot, aes(Dim1, Dim2, colour=group)) + 
   geom_point(aes(shape=sex), size=5) +
   scale_shape_manual(values=c(17, 15)) +
   geom_text_repel(data=toplot, label=rownames(toplot)) +
   ggtitle('Multidimensional scaling (MDS) plot')
 
 pdf('MDS.plot.pdf')
-ggplot(toplot, aes(Dim1, Dim2, colour=group)) + 
-  geom_point(aes(shape=sex), size=5) +
-  scale_shape_manual(values=c(17, 15)) +
-  geom_text_repel(data=toplot, label=rownames(toplot)) +
-  ggtitle('Multidimensional scaling (MDS) plot')
+mds.plot
 dev.off()
 ```
 
@@ -171,7 +172,7 @@ lrt$threshold <- threshold
 
 # Order on FDR
 ordered <- lrt[order(lrt$FDR),]
-ggplot(lrt) +
+volcano.plot <- ggplot(lrt) +
   geom_point(aes(x=logFC, y=-log10(FDR), colour=threshold)) +
   geom_text_repel(data=head(ordered, n.genes), aes(x=logFC, y=-log10(FDR), label=gene)) +
   ggtitle("Volcano Plot: Parkinson's Disease") +
@@ -180,17 +181,10 @@ ggplot(lrt) +
   theme(plot.title = element_text(size = rel(1.5), hjust = 0.5),
         axis.title = element_text(size = rel(1.25))) +
   scale_color_discrete(name = "DEG")
+volcano.plot
 
 pdf(paste0('Volcano.Plot.top', n.genes, '.pdf'))
-ggplot(lrt) +
-  geom_point(aes(x=logFC, y=-log10(FDR), colour=threshold)) +
-  geom_text_repel(data=head(ordered, n.genes), aes(x=logFC, y=-log10(FDR), label=gene)) +
-  ggtitle("Volcano Plot: Parkinson's Disease") +
-  xlab("log2 fold change") +
-  ylab("-log10 FDR") +
-  theme(plot.title = element_text(size = rel(1.5), hjust = 0.5),
-        axis.title = element_text(size = rel(1.25))) +
-  scale_color_discrete(name = "DEG")
+volcano.plot
 dev.off()
 ```
 
@@ -209,9 +203,8 @@ dev.off()
 ```
 
 # Over Representation Analysis (ORA)
-
 ```{r echo=FALSE}
-gene.set <- read.gmt('reactome.gmt')
+gene.set <- read.gmt('../reactome.gmt')
 sigOE <- subset(lrt, abs(logFC) > 0.5 & FDR < 0.05)
 
 ego <- enricher(gene = sigOE$gene, 
@@ -275,29 +268,27 @@ dev.off()
 
 ### Extract genes from interesting pathway. Select pathway with **pathway** variable
 ```{r echo=FALSE}
-pathway <- 4
+pathway <- 3
 plot.genes <- unlist(strsplit(data.frame(ego)[pathway,8], '/'))
+gene.name <- 
 rownames(tmm) <- gsub('ENSG[0-9]+.[0-9]+\\|', '', rownames(tmm))
 colnames(tmm) <- gsub('[0-9]+', '', colnames(tmm))
 plot.data <- subset(tmm, rownames(tmm) %in% plot.genes)
 plot.data <- plot.data[order(rowSums(plot.data), decreasing = T),]
 plot.data <- melt(plot.data)
 colnames(plot.data) <- c('gene', 'condition', 'cpm')
-ggplot(plot.data, aes(x=gene, y=cpm, fill=condition)) + 
+boxplot.plot <- ggplot(plot.data, aes(x=gene, y=cpm, fill=condition)) + 
   geom_boxplot() +
   theme(axis.text.x = element_text(angle=45, hjust=1)) +
   ggtitle(paste('', ego[pathway,1])) +
   ggtitle(paste('Expression of', ego[pathway,1], 'genes'))
 
+boxplot.plot
+
 pdf('boxplot.pdf', width=14)
-ggplot(plot.data, aes(x=gene, y=cpm, fill=condition)) + 
-  geom_boxplot() +
-  theme(axis.text.x = element_text(angle=45, hjust=1)) +
-  ggtitle(paste('', ego[pathway,1])) +
-  ggtitle(paste('Expression of', ego[pathway,1], 'genes'))
+boxplot.plot
 dev.off()
 
 # Show logFC of genes in pathway
 subset(lrt, gene %in% plot.data$gene)
 ```
-
