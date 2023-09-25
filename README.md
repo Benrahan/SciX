@@ -50,7 +50,7 @@ Rstudio can be downloaded and installed at this link:
 https://posit.co/download/rstudio-desktop/
 
 # Download files from github
-At the top of this page is be a green button **CODE**. Click the button and then select **Download ZIP**.
+At the top of this page is a green button **CODE**. Click the button and then select **Download ZIP**.
 This will download a SciX-main.zip file to your Downloads folder on your computer. This file contains everything you will need to perform this study. 
 Unzip the file by double clicking and move the unzipped directory to your Desktop.
 
