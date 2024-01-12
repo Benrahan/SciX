@@ -1,5 +1,5 @@
 ---
-title: 'AD DEG'
+title: 'SciX: Genies'
 author: "Lachlan Gray"
 date: "19/06/2022"
 output: html_document
@@ -19,7 +19,7 @@ getwd()
 ```
 
 For MacOS and Linux getwd() should return the following path:
-"/Users/USER/Desktop/SciX-main/HD"
+"/Users/USER/Desktop/SciX-main/PD"
 
 We can then see which files are available in this directory with the dir() command:
 ```{r setup, include=FALSE}
@@ -66,12 +66,17 @@ library(statmod, verbose=F)
 library(pheatmap, verbose=F)
 ```
 
+## Set working directory
+We need to tell R which folder (known as directory) our data is located and where we want to store our results.
+This directory will be the unzipped SciX-main directory we just downloaded.  
+As naming paths are different in Mac and PC please make sure you run the appropriate line of code.
+
 ### Read in RNA sequencing count matrix. This is the data that we will be using for this experiment
 The read.csv command allows us to load a comma separated file into R. This file contains data in the form of a matrix (a grid of numbers). The "header" option is set to "T" which means that the first row of the file contains the names of the columns. The "row.names" option is set to "1" which means that the first column of the file containing the gene names is used to name each row.
 We then print the first five rows of the matrix (which includes all of the columns) to the screen. It also prints the dimensions of the matrix, which tells us the number of rows (genes) and columns (individuals) in the matrix.
 ```{r echo=FALSE}
 # Read in comma separated count matrix
-count.matrix <- read.csv('AD.data.csv', 
+count.matrix <- read.csv('PD.data.csv', 
                          header=T, row.names = 1)
 # print the first five rows and all of the columns
 count.matrix[1:5,]
@@ -81,18 +86,22 @@ dim(count.matrix)
 
 ### Read in sample metadata
 ```{r echo=FALSE}
-metadata <- read.delim('AD.metadata.txt')
-metadata <- metadata[order(metadata$condition),]
-table(metadata$condition)
+metadata <- unique(read.delim('PD.metadata.txt')[,-1])
+print(metadata)
 ```
 
 ### To make the column names more informative we replace with metadata$condition column
 ```{r echo=FALSE}
-count.matrix <- count.matrix[,metadata$run]
-colnames(count.matrix) <- c(paste(metadata$condition[1:12], 1:12, sep='_'),
-                            paste(metadata$condition[13:22], 1:10, sep='_'),
-                            paste(metadata$condition[23:30], 1:8, sep='_'))
+count.matrix <- count.matrix[,metadata$individual]
+colnames(count.matrix) <- c(paste(metadata$condition[1:9], 1:9, sep='_'),
+                        paste(metadata$condition[10:16], 1:7, sep='_'))
+# Print first 5 genes
+count.matrix[1:5,]
 ```
+
+
+
+
 
 ### Adding biological sex to the metadata file
 You may have noticed that information about the individuals age and sex is missing from the metadata. By looking at expression of genes on the X and Y chromosomes we can determine the biological sex of these samples. The method to infer sex from gene expression is a little complicated but we can return to this later if you'd like.
@@ -124,95 +133,4 @@ metadata$sex <- ifelse(cluster.result == 2, 'F', 'M')
 XIST.expression
 
 ```
-
-# Differential expression analysis with edgeR likelihood ratio test
-We will perform a statistical test to determine which genes are different between our conditions. For this, we will use the likelihood ratio test which takes models from each condition and compares them.
-We then make our disease samples the reference group. This tells us the difference in gene expression in relation to our disease group. For example, a gene with a positive (+) logFC is upregulated in disease and a negative (-) logFC is downregulated in disease.
-We then filter out lowly expressed genes, normalise the expression values and perform the test.
-To visualise our results, we create plots to show differentially expressed genes.
-
-
-```{r echo=FALSE}
-# Create a dataframe containing all of the required information
-targets = data.frame(group = metadata$condition,
-                    sex = metadata$sex)
-# Create the model which considers the sex and condition in the analysis
-design <- model.matrix(~0+sex+group, data=targets)
-y = DGEList(counts = count.matrix, group = targets$group)
-# Change the reference group to the disease group
-y$samples$group <- factor(y$samples$group, levels=c('disease', 'old', 'young'))
-# Filter lowly expressed genes
-keep <- filterByExpr(y)
-y <- y[keep, ,keep.lib.sizes=FALSE]
-# Normalise the data to remove between sample differences
-y <- calcNormFactors(y, method = "TMM")
-# Transform data into a counts per million value
-tmm <- cpm(y)
-# Estimate the dispersion in the data
-y <- estimateDisp(y, design, robust=TRUE)
-# Fit data to a model and include disease vs old and disease vs young
-fit <- glmQLFit(y, design, coef=3:4)
-# Likelihood ratio test to compare models
-lrt <- glmLRT(fit)
-tt <- topTags(lrt, n=nrow(y), p.value=0.05)
-# Smearplot
-plotSmear(lrt, de.tags=rownames(tt$table))
-pdf('smearplot.pdf')
-plotSmear(lrt, de.tags=rownames(tt$table))
-dev.off()
-print(summary(decideTests(lrt)))
-lrt <- as.data.frame(lrt)
-lrt$FDR <- qvalue(lrt$PValue)$qvalues
-gene <- gsub('ENSG[0-9]+.[0-9]+\\|', '', rownames(lrt))
-lrt <- cbind(gene,lrt)
-# Top 10 differentially expressed genes
-lrt[order(lrt$FDR),][1:10,]
-
-# MDS plot
-mds <- plotMDS(y, top=1000, plot=F)
-toplot <- data.frame(Dim1 = mds$x, Dim2=mds$y, group=factor(y$samples$group), sex=factor(metadata$sex))
-mds.plot <- ggplot(toplot, aes(Dim1, Dim2, colour=group)) + 
-  geom_point(aes(shape=sex), size=5) +
-  scale_shape_manual(values=c(17, 15)) +
-  geom_text_repel(data=toplot, label=rownames(toplot)) +
-  ggtitle('Multidimensional scaling (MDS) plot')
-
-pdf('MDS.plot.pdf')
-mds.plot
-dev.off()
-```
-
-### Save result file to working directory
-```{r echo=TRUE}
-write.table(lrt, row.names = F, sep = "\t", 'edgeR-LRT.AD.txt')
-```
-
-## Displaying results in volcano plot
-This plot displays the log fold-change and false discovery rate for each gene. You can select the number of genes to label with the **n.genes** variable below.
-```{r echo=FALSE}
-n.genes = 20
-
-threshold <- lrt$FDR < 0.05 & abs(lrt$logFC) > 0.5
-lrt$threshold <- threshold
-
-# Order on FDR
-ordered <- lrt[order(lrt$FDR),]
-volcano.plot <- ggplot(lrt) +
-  geom_point(aes(x=logFC, y=-log10(FDR), colour=threshold)) +
-  geom_text_repel(data=head(ordered, n.genes), aes(x=logFC, y=-log10(FDR), label=gene)) +
-  ggtitle("Volcano Plot: Alzheimer's Disease") +
-  xlab("log2 fold change") +
-  ylab("-log10 FDR") +
-  theme(plot.title = element_text(size = rel(1.5), hjust = 0.5),
-        axis.title = element_text(size = rel(1.25))) +
-  scale_color_discrete(name = "DEG")
-volcano.plot
-
-pdf(paste0('Volcano.Plot.top', n.genes, '.pdf'))
-volcano.plot
-dev.off()
-```
-
-
-
 

@@ -19,7 +19,7 @@ getwd()
 ```
 
 For MacOS and Linux getwd() should return the following path:
-"/Users/USER/Desktop/SciX-main/HD"
+"/Users/USER/Desktop/SciX-main/PD"
 
 We can then see which files are available in this directory with the dir() command:
 ```{r setup, include=FALSE}
@@ -98,6 +98,43 @@ colnames(count.matrix) <- c(paste(metadata$condition[1:9], 1:9, sep='_'),
 # Print first 5 genes
 count.matrix[1:5,]
 ```
+
+
+
+
+
+### Adding biological sex to the metadata file
+You may have noticed that information about the individuals age and sex is missing from the metadata. By looking at expression of genes on the X and Y chromosomes we can determine the biological sex of these samples. The method to infer sex from gene expression is a little complicated but we can return to this later if you'd like.
+```{r echo=FALSE}
+# Load in chrY data from the directory behind the working directory
+load('../chrY.Rdata')
+
+# First we infer sex based on expression of female specific XIST gene
+XIST.expression <- unlist(count.matrix[grep('XIST', rownames(count.matrix)),])
+
+# Filter matrix for XIST and Y chromosome genes then filter and transpose data to have genes on columns and samples on rows
+count.matrix.Y <- count.matrix %>%
+  mutate(gene = gsub('.+\\|', '', rownames(count.matrix))) %>%
+  filter(gene %in% c('XIST', rownames(chrY))) %>% 
+  select(-gene) %>%
+  filter(rowSums(.) > nrow(.)) %>% 
+  t() %>%
+  data.frame()
+
+# Perform hierarchical clustering to identify groups
+dissimilarity <- dist(count.matrix.Y[,-1], method='euclidean')
+cluster <- hclust(dissimilarity, method = 'centroid')
+plot(cluster)
+cluster.result <- cutree(cluster, k=2)
+
+# Assign sex based on dendrogram
+metadata$sex <- ifelse(cluster.result == 2, 'F', 'M')
+# sanity check of XIST expression
+XIST.expression
+
+```
+
+
 
 # Differential expression analysis with edgeR likelihood ratio test
 We will perform a statistical test to determine which genes are different between our conditions. For this, we will use the likelihood ratio test which takes models from each condition and compares them.
@@ -186,109 +223,4 @@ volcano.plot
 pdf(paste0('Volcano.Plot.top', n.genes, '.pdf'))
 volcano.plot
 dev.off()
-```
-
-## Display results as heatmap
-This plot will show gene expression in a heatmap where the colour of the tile indicates gene expression in each sample. You can select the number of genes to show with the **n.genes** variable below.
-
-```{r echo=FALSE}
-n.genes <- 20
-mat <- tmm[head(order(lrt$FDR), n.genes),]
-rownames(mat) <- gsub('ENSG[0-9]+.[0-9]+\\|', '', rownames(mat))
-pheatmap::pheatmap(scale(mat))
-
-pdf(paste0('Heatmap.top', n.genes, '.pdf'))
-pheatmap::pheatmap(scale(mat))
-dev.off()
-```
-
-# Over Representation Analysis (ORA)
-```{r echo=FALSE}
-gene.set <- read.gmt('../reactome.gmt')
-sigOE <- subset(lrt, abs(logFC) > 0.5 & FDR < 0.05)
-
-ego <- enricher(gene = sigOE$gene, 
-         universe = lrt$gene,
-         pAdjustMethod = "fdr", 
-         qvalueCutoff = 0.01,
-         TERM2GENE = gene.set)
-
-dotplot(ego, showCategory=20, orderBy="GeneRatio")
-pdf('reactome.ORA.pdf', width = 14)
-dotplot(ego, showCategory=20, orderBy="GeneRatio")
-dev.off()
-
-upsetplot(ego)
-pdf('reactome.upsetplot.pdf')
-upsetplot(ego)
-dev.off()
-```
-
-### Match genes to DisGeneNet and perform chi-squared test
-```{r echo=FALSE}
-disgene <- read.delim('disgenenet.PD.tsv', header=T, sep="\t")
-disgene <- unique(disgene$Gene)
-
-deg <- subset(lrt, abs(logFC) > 0.5 & FDR < 0.05)
-not.deg <- subset(lrt, FDR > 0.05)
-up <- subset(lrt, logFC > 0.5 & FDR < 0.05)
-down <- subset(lrt, logFC < -0.5 & FDR < 0.05)
-
-# calculate numbers for different conditions
-a <- lrt[lrt$FDR < 0.05 & abs(lrt$logFC) > 0.5 & lrt$gene %in% disgene,]$gene
-b <- lrt[lrt$FDR < 0.05 & abs(lrt$logFC) > 0.5 & !(lrt$gene %in% disgene),]$gene
-c <- lrt[lrt$FDR > 0.05 & lrt$gene %in% disgene,]$gene
-d <- lrt[lrt$FDR > 0.05 & !(lrt$gene %in% disgene),]$gene
-ctable <- matrix(c(length(a),length(b),length(c),length(d)),nrow=2, ncol=2)
-chisq <- chisq.test(ctable)
-
-print('Expected values')
-chisq$expected
-
-print('Observed values')
-chisq$observed
-
-print('Pearson residuals') #Positive values indicate a positive association
-chisq$residuals
-
-print('chi.squared p.value')
-chisq$p.value
-
-# ORA of significant genes known to cause disease
-ego <- enricher(gene = a, 
-                universe = lrt$gene,
-                pAdjustMethod = "fdr", 
-                qvalueCutoff = 0.01,
-                TERM2GENE = gene.set)
-dotplot(ego, orderBy="GeneRatio", font.size=10, label_format=20)
-pdf('disgenenet.ORA.pdf', width=14)
-dotplot(ego, orderBy="GeneRatio", font.size=12, label_format=20)
-dev.off()
-```
-
-### Extract genes from interesting pathway. Select pathway with **pathway** variable
-```{r echo=FALSE}
-pathway <- 3
-plot.genes <- unlist(strsplit(data.frame(ego)[pathway,8], '/'))
-gene.name <- 
-rownames(tmm) <- gsub('ENSG[0-9]+.[0-9]+\\|', '', rownames(tmm))
-colnames(tmm) <- gsub('[0-9]+', '', colnames(tmm))
-plot.data <- subset(tmm, rownames(tmm) %in% plot.genes)
-plot.data <- plot.data[order(rowSums(plot.data), decreasing = T),]
-plot.data <- melt(plot.data)
-colnames(plot.data) <- c('gene', 'condition', 'cpm')
-boxplot.plot <- ggplot(plot.data, aes(x=gene, y=cpm, fill=condition)) + 
-  geom_boxplot() +
-  theme(axis.text.x = element_text(angle=45, hjust=1)) +
-  ggtitle(paste('', ego[pathway,1])) +
-  ggtitle(paste('Expression of', ego[pathway,1], 'genes'))
-
-boxplot.plot
-
-pdf('boxplot.pdf', width=14)
-boxplot.plot
-dev.off()
-
-# Show logFC of genes in pathway
-subset(lrt, gene %in% plot.data$gene)
 ```

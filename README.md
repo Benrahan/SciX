@@ -56,6 +56,7 @@ Unzip the file by double clicking and move the unzipped directory to your Deskto
 
 # Open the .Rmd in RStudio
 Choose a disease and open the respective folder e.g AD, PD, HD \
+There are three files labelled 1 --> 3 from metadata to gene ontology. The full script is found in 3.gene_ontology, however we will be learning the theory for metadata, differential expression and gene ontology seperately. \
 Double click on the SciX.Genies.Rmd file to open in RStudio. Carefully follow the instructions.\
 Enjoy!
 
@@ -65,7 +66,7 @@ email: \
 l.gray@garvan.org.au \
 twitter: \
 @LGGray95
-
+Edited by: Helen King
 
 
 
