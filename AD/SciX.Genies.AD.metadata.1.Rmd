@@ -1,0 +1,130 @@
+---
+title: 'SciX: Genies'
+author: "Lachlan Gray"
+date: "19/06/2022"
+output: html_document
+runtime: shiny
+---
+### Introduction
+
+This file is an Rmarkdown file. Upon successfully installed R and RStudio you should be able to follow the instructions below. If you run into errors please flag on the GitHub page or search the error in Google.
+
+To run each chunk of code press the green arrow next to the command or select the code and run with 'command + enter'.
+
+Opening this Rmarkdown file will place us into the required working directory. A directory is another name for folders on the computer. All of the plots and files we generate will be saved to the working directory.
+We can find which directory we are in with the getwd() command:
+
+```{r echo=FALSE}
+getwd()
+```
+
+For MacOS and Linux getwd() should return the following path:
+"/Users/USER/Desktop/SciX-main/HD"
+
+We can then see which files are available in this directory with the dir() command:
+```{r setup, include=FALSE}
+dir()
+```
+
+
+### Setting up R
+```{r setup, include=FALSE}
+install.packages('knitr', verbose=F)
+knitr::opts_chunk$set(echo = TRUE)
+r <- getOption("repos")
+r["CRAN"] <- "https://cran.csiro.au/"
+options(repos = r)
+```
+
+### Install packages 
+If asked to update all/some/none just enter 'a' in the console below.
+```{r, echo=FALSE}
+install.packages('ggplot2', verbose = F)
+install.packages('reshape2', verbose = F)
+install.packages('ggrepel', verbose = F)
+install.packages('ggupset', verbose = F)
+install.packages('BiocManager', verbose = F)
+install.packages('statmod', verbose = F)
+install.packages('pheatmap', verbose = F)
+BiocManager::install("qvalue")
+BiocManager::install("edgeR")
+BiocManager::install("clusterProfiler")
+```
+
+### Load the packages
+```{r echo=FALSE}
+library(ggplot2, verbose = F)
+library(qvalue, verbose = F)
+library(reshape2, verbose = F)
+library(ggrepel, verbose = F)
+library(ggupset, verbose = F)
+library(enrichplot, verbose = F)
+library(edgeR, verbose = F)
+library(DOSE, verbose = F)
+library(clusterProfiler, verbose = F)
+library(statmod, verbose=F)
+library(pheatmap, verbose=F)
+```
+
+### Read in RNA sequencing count matrix. This is the data that we will be using for this experiment
+The read.csv command allows us to load a comma separated file into R. This file contains data in the form of a matrix (a grid of numbers). The "header" option is set to "T" which means that the first row of the file contains the names of the columns. The "row.names" option is set to "1" which means that the first column of the file containing the gene names is used to name each row.
+We then print the first five rows of the matrix (which includes all of the columns) to the screen. It also prints the dimensions of the matrix, which tells us the number of rows (genes) and columns (individuals) in the matrix.
+```{r echo=FALSE}
+# Read in comma separated count matrix
+count.matrix <- read.csv('AD.data.csv', 
+                         header=T, row.names = 1)
+# print the first five rows and all of the columns
+count.matrix[1:5,]
+# Print the dimensions of this matrix. This tells us we have 58,721 genes and 13 individuals
+dim(count.matrix)
+```
+
+### Read in sample metadata
+```{r echo=FALSE}
+metadata <- read.delim('AD.metadata.txt')
+metadata <- metadata[order(metadata$condition),]
+table(metadata$condition)
+```
+
+### To make the column names more informative we replace with metadata$condition column
+```{r echo=FALSE}
+count.matrix <- count.matrix[,metadata$run]
+colnames(count.matrix) <- c(paste(metadata$condition[1:12], 1:12, sep='_'),
+                            paste(metadata$condition[13:22], 1:10, sep='_'),
+                            paste(metadata$condition[23:30], 1:8, sep='_'))
+```
+
+### Adding biological sex to the metadata file
+You may have noticed that information about the individuals age and sex is missing from the metadata. By looking at expression of genes on the X and Y chromosomes we can determine the biological sex of these samples. The method to infer sex from gene expression is a little complicated but we can return to this later if you'd like.
+```{r echo=FALSE}
+# Load in chrY data from the directory behind the working directory
+load('../chrY.Rdata')
+
+# First we infer sex based on expression of female specific XIST gene
+XIST.expression <- unlist(count.matrix[grep('XIST', rownames(count.matrix)),])
+
+# Filter matrix for XIST and Y chromosome genes then filter and transpose data to have genes on columns and samples on rows
+count.matrix.Y <- count.matrix %>%
+  mutate(gene = gsub('.+\\|', '', rownames(count.matrix))) %>%
+  filter(gene %in% c('XIST', rownames(chrY))) %>% 
+  select(-gene) %>%
+  filter(rowSums(.) > nrow(.)) %>% 
+  t() %>%
+  data.frame()
+
+# Perform hierarchical clustering to identify groups
+dissimilarity <- dist(count.matrix.Y[,-1], method='euclidean')
+cluster <- hclust(dissimilarity, method = 'centroid')
+plot(cluster)
+cluster.result <- cutree(cluster, k=2)
+
+# Assign sex based on dendrogram
+metadata$sex <- ifelse(cluster.result == 2, 'F', 'M')
+# sanity check of XIST expression
+XIST.expression
+
+```
+
+
+
+
