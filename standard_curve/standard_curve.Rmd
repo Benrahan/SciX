@@ -25,7 +25,7 @@ library(dplyr)
 Use a function to download excel file
 ```{r}
 
-download.file("https://raw.githubusercontent.com/theheking/SciX/main/data/standard_curve.xlsx", "standard_curve.xlsx")
+download.file("https://raw.githubusercontent.com/theheking/SciX/main/standard_curve/standard_curve.xlsx", "standard_curve.xlsx")
 
 
 ```
