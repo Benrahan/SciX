@@ -1,0 +1,56 @@
+---
+title: "standard_curve"
+author: "Helen"
+date: "2024-01-15"
+output: html_document
+---
+Install the packages
+```{r}
+install.packages("reshape") 
+install.packages("readxl")
+install.packages("reshape")
+install.packages("tibble")
+install.packages("dplyr")
+```
+Load the libraries we just installed
+```{r}
+library(readxl)
+library(ggplot2)
+library(reshape) 
+library(tibble)
+library(dplyr)
+```
+
+
+Use a function to download excel file
+```{r}
+
+download.file("https://raw.githubusercontent.com/theheking/SciX/main/data/standard_curve.xlsx", "standard_curve.xlsx")
+
+
+```
+
+Import data correctly and rearrange to make a dataframe 
+```{r}
+
+starch_standard_curve <- read_excel("standard_curve.xlsx", 
+                                    range = "A10:M13")
+
+starch_standard_curve <- column_to_rownames(starch_standard_curve, var = "Abs")
+starch_standard_curve_reformatted <- melt.data.frame(starch_standard_curve, variable_name="well")
+
+```
+
+
+
+```{r}
+starch_standard_curve_reformatted$value <- as.numeric(starch_standard_curve_reformatted$value)
+ggplot(data = starch_standard_curve_reformatted, aes(x = well, y = value, group=1)) +
+  geom_point() +
+  geom_smooth( se = FALSE, col='pink', linetype='dashed') +
+  theme_bw()+
+  ggtitle("Standard Curve of Series Dilution") + ylab( "Absorbance") +xlab("Dilution Number")
+
+
+```
+
