@@ -236,8 +236,8 @@ pdf('reactome.ORA.pdf', width = 14)
 dotplot(ego, showCategory=20, orderBy="GeneRatio",font.size=12)
 dev.off()
 
-upsetplot(ego)
-pdf('reactome.upsetplot.pdf')
+upsetplot(ego) + theme(axis.text.y = element_text(size=6))
+pdf('reactome.upsetplot.pdf', width = 14)
 upsetplot(ego)
 dev.off()
 ```
