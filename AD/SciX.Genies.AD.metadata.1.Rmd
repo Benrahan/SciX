@@ -19,7 +19,7 @@ getwd()
 ```
 
 For MacOS and Linux getwd() should return the following path:
-"/Users/USER/Desktop/SciX-main/HD"
+"/Users/USER/Desktop/SciX-main/AD"
 
 We can then see which files are available in this directory with the dir() command:
 ```{r setup, include=FALSE}
