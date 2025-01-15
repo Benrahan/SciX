@@ -216,6 +216,7 @@ dev.off()
 
 
 # Over Representation Analysis (ORA)
+## if dotplot reactome names are overlapping and unreadable try changing "font.size=12" to a lower number
 ```{r echo=FALSE}
 gene.set <- read.gmt('../reactome.gmt')
 sigOE <- subset(lrt, abs(logFC) > 0.5 & FDR < 0.05)
