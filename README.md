@@ -62,11 +62,8 @@ Enjoy!
 
 
 Lachlan Gray \
-email: \
-l.gray@garvan.org.au \
-twitter: \
-@LGGray95
-Edited by: Helen King
+Edited by: Helen King \
+Edited by: Ben Hanrahan
 
 
 
