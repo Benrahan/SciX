@@ -292,7 +292,7 @@ dev.off()
 ### Extract genes from interesting pathway. Select pathway with **pathway** variable
 ```{r echo=FALSE}
 pathway <- 3
-plot.genes <- unlist(strsplit(data.frame(ego)[pathway,8], '/'))
+plot.genes <- unlist(strsplit(data.frame(ego)[pathway,11], '/'))
 gene.name <- 
 rownames(tmm) <- gsub('ENSG[0-9]+.[0-9]+\\|', '', rownames(tmm))
 colnames(tmm) <- gsub('[0-9]+', '', colnames(tmm))
