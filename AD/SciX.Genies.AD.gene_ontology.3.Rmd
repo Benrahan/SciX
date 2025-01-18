@@ -220,7 +220,7 @@ dev.off()
 
 
 # Over Representation Analysis (ORA)
-Over-representation analysis is used to determine which defined gene sets are more present (over-represented) in a subset of genes than what would be expected by chance. We can use this to associate lists od DE genes to a possible function. 
+Over-representation analysis is used to determine which defined gene sets are more present (over-represented) in a subset of genes than what would be expected by chance. We can use this to associate lists of DE genes to a possible function. 
 Here we are comparing them to the Reactome database, which is a collection of information on biological processes and pathways that also contains information about which genes are involved. This information is collated from functional studies on these processes and pathways. 
 In the dotplot generated below, the y axis is the top 20 enriched gene sets, and the x axis of the plot (GeneRatio) refers to the ratio of significant genes to the total number of genes within the set.
 Note: if dotplot reactome names are overlapping and unreadable try changing "font.size=12" to a lower number.
