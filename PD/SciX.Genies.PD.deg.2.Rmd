@@ -94,7 +94,7 @@ metadata <- unique(read.delim('PD.metadata.txt')[,-1])
 print(metadata)
 ```
 
-### To make the column names more informative we replace with metadata$condition column
+### To make the column names of count.matrix more informative, we use the information in the metadata (individual and condition) to rename the columns in the style control_1 or disease_1 etc. rather than as a string of numbers
 ```{r echo=FALSE}
 count.matrix <- count.matrix[,metadata$individual]
 colnames(count.matrix) <- c(paste(metadata$condition[1:9], 1:9, sep='_'),
