@@ -256,7 +256,10 @@ upsetplot(ego)
 dev.off()
 ```
 
-### Match genes to DisGeneNet and perform chi-squared test
+### Match genes to DisGeNET and perform chi-squared test
+DisGeNET is a large database containing associations between genes and diseases from thousands of studies. 
+We have downloaded the list of genes assciated with Parkinsons Disease and we can see if our list of DE genes contains a significant overlap with these genes. 
+We will also do another ORA this time with just the genes that we know are significantly differentially expressed AND associated with PD (from DisGeNET).
 ```{r echo=FALSE}
 disgene <- read.delim('disgenenet.PD.tsv', header=T, sep="\t")
 disgene <- unique(disgene$Gene)
