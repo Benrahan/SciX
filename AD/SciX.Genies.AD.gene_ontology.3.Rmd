@@ -5,6 +5,10 @@ date: "19/06/2022"
 output: html_document
 runtime: shiny
 ---
+###Important Note 
+
+If you have already successfully installed all packages in a previous script such as SciX.Genies.AD.metadata.1.Rmd you do not need to do so again and can start this script from the "Load the packages section. 
+
 ### Introduction
 
 This file is an Rmarkdown file. Upon successfully installed R and RStudio you should be able to follow the instructions below. If you run into errors please flag on the GitHub page or search the error in Google.
