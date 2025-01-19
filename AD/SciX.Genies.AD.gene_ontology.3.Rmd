@@ -316,6 +316,7 @@ ego.df[1:5,]
 
 ### Extract genes from interesting pathway. Select pathway with **pathway** variable
 The number to enter as the **pathway** variable can be found as the line or row number of that pathway/term in the 'reactome.Terms.list.txt' or 'disgenenet.Terms.list.txt' files. This chunk will then plot expression of all genes in that pathway as boxplots.
+Note: if boxplot scales are being thrown off by dots(genes) with very high expression try setting "outliers = F" on line 331
 ```{r echo=FALSE}
 pathway <- 1
 plot.genes <- unlist(strsplit(data.frame(ego)[pathway,11], '/'))
@@ -327,7 +328,7 @@ plot.data <- plot.data[order(rowSums(plot.data), decreasing = T),]
 plot.data <- melt(plot.data)
 colnames(plot.data) <- c('gene', 'condition', 'cpm')
 boxplot.plot <- ggplot(plot.data, aes(x=gene, y=cpm, fill=condition)) + 
-  geom_boxplot() +
+  geom_boxplot(outliers = T) +
   theme(axis.text.x = element_text(angle=45, hjust=1)) +
   ggtitle(paste('', ego[pathway,1])) +
   ggtitle(paste('Expression of', ego[pathway,1], 'genes'))
