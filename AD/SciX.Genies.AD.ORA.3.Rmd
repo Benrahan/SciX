@@ -1,5 +1,5 @@
 ---
-title: 'AD Gene Ontology'
+title: 'AD Over-Representation Analysis'
 author: "Lachlan Gray"
 date: "19/06/2022"
 output: html_document
