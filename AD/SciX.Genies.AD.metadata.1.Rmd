@@ -75,7 +75,7 @@ count.matrix <- read.csv('AD.data.csv',
                          header=T, row.names = 1)
 # print the first five rows and all of the columns
 count.matrix[1:5,]
-# Print the dimensions of this matrix. This tells us we have 58,721 genes and 13 individuals
+# Print the dimensions of this matrix. This tells us we have 58,721 genes and 30 individuals
 dim(count.matrix)
 ```
 
