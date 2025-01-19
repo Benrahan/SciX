@@ -246,6 +246,18 @@ upsetplot(ego)
 dev.off()
 ```
 
+# Save over-respresented reactome terms to working directory
+This saves a file called 'reactome.Terms.list.txt' that can then be opened in excel or another text editor. The line or row number of a pathway is the number to be entered in the "Extract genes from interesting pathway" section lower down to see boxplots of genes in that pathway (only if run directly after this code chunk). A pathway of interest can also be searched at https://reactome.org/PathwayBrowser/ to see what broader biological process it relates to. 
+```{r echo = TRUE}
+#create a. list of over-represented reactome terms 
+ego.df <- data.frame(ego)
+#output to a text file we can look at in excel or any text editor 
+write.table(ego.df, row.names = F,col.names = F, sep = "\t", 'reactome.Terms.list.txt')
+#show first 5 rows
+ego.df[1:5,]
+
+```
+
 ### Match genes to DisGeNET and perform chi-squared test
 DisGeNET is a large database containing associations between genes and diseases from thousands of studies. 
 We have downloaded the list of genes associated with Alzheimer's Disease and we can see if our list of DE genes contains a significant overlap with these genes. 
@@ -291,7 +303,19 @@ dotplot(ego, orderBy="GeneRatio", font.size=12, label_format=20)
 dev.off()
 ```
 
+# Save reactome terms identified in DisGeNET 
+This saves a file called 'disgenenet.Terms.list.txt' that can then be opened in excel or another text editor, but this file only includes terms with genes identified in DisGeNET and Differentially expressed. The line or row number of a pathway is the number to be entered in the "Extract genes from interesting pathway" section below to see boxplots of genes in that pathway (only if run directly after this code chunk). A pathway of interest can also be searched at https://reactome.org/PathwayBrowser/ to see what broader biological process it relates to.
+```{r echo=TRUE}
+#create a. list of over-represented reactome terms associated with DisGeNET genes 
+ego.df <- data.frame(ego)
+#output to a text file we can look at in excel or any text editor 
+write.table(ego.df, row.names = F,col.names = F, sep = "\t", 'disgenenet.Terms.list.txt')
+#show first 5 rows
+ego.df[1:5,]
+```
+
 ### Extract genes from interesting pathway. Select pathway with **pathway** variable
+The number to enter as the **pathway** variable can be found as the line or row number of that pathway/term in the 'reactome.Terms.list.txt' or 'disgenenet.Terms.list.txt' files. This chunk will then plot expression of all genes in that pathway as boxplots.
 ```{r echo=FALSE}
 pathway <- 1
 plot.genes <- unlist(strsplit(data.frame(ego)[pathway,11], '/'))
