@@ -66,11 +66,6 @@ library(statmod, verbose=F)
 library(pheatmap, verbose=F)
 ```
 
-## Set working directory
-We need to tell R which folder (known as directory) our data is located and where we want to store our results.
-This directory will be the unzipped SciX-main directory we just downloaded.  
-As naming paths are different in Mac and PC please make sure you run the appropriate line of code.
-
 ### Read in RNA sequencing count matrix. This is the data that we will be using for this experiment
 The read.csv command allows us to load a comma separated file into R. This file contains data in the form of a matrix (a grid of numbers). The "header" option is set to "T" which means that the first row of the file contains the names of the columns. The "row.names" option is set to "1" which means that the first column of the file containing the gene names is used to name each row.
 We then print the first five rows of the matrix (which includes all of the columns) to the screen. It also prints the dimensions of the matrix, which tells us the number of rows (genes) and columns (individuals) in the matrix.
